@@ -1,8 +1,7 @@
---This Script import a table
---Sorts content beased on unique fans
-mysql -u username -p database_name < metal_bands.sql
+-- This Script import a table
+-- Sorts content beased on unique fans
 
-SELECT origin, COUNT(DISTINCT nb_fans) as unique_fan_count
-FROM fans
+SELECT origin, SUM(fans) AS nb_fans
+FROM metal_bands
 GROUP BY origin
-ORDER BY unique_fan_count DESC;
+ORDER BY nb_fans DESC
