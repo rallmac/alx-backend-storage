@@ -1,5 +1,5 @@
--- This script creates a table called users
--- It drops the table if it already exists
+-- 3 first students in the Batch ID=3
+-- because Batch 3 is the best!
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
