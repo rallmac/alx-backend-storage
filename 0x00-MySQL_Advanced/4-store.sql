@@ -9,7 +9,7 @@ FOR EACH ROW
 BEGIN
     -- Update the quantity of the item after
     -- a new order is added
-    UPDATE items
+    UPDATE item
     SET quantity = quantity - NEW.order_quantity
     WHERE item_id = NEW.item_id;
 END$$

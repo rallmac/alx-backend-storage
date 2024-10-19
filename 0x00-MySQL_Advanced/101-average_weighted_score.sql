@@ -9,7 +9,7 @@ BEGIN
     DECLARE user_id INT;
     DECLARE avg_weighted_score DECIMAL(10,2);
     DECLARE cur CURSOR FOR 
-        SELECT id FROM users;  -- Cursor to iterate over all users
+        SELECT id FROM users;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
     OPEN cur;
