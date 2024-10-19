@@ -1,7 +1,9 @@
--- This Script selects band names and
--- compute lifespan using 2022 as the reference year
-
-
-SELECT band_name, 
-       (IFNULL(split, 2022) - formed) AS lifespan 
-FROM metal_bands;
+SELECT 
+    band_name, 
+    IFNULL(split, 2022) - formed AS lifespan
+FROM 
+    metal_bands
+WHERE 
+    FIND_IN_SET('Glam rock', style) > 0
+ORDER BY 
+    lifespan DESC;
