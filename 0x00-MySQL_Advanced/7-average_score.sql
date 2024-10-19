@@ -1,8 +1,12 @@
+-- This script creates a stored procedure which computes and
+-- stores average score for students. Average score can be a decimal
+
+
 DELIMITER $$
 
 CREATE PROCEDURE ComputeAverageScoreForUser(IN user_id INT)
 BEGIN
-    DECLARE avg_score DECIMAL(5,2);
+    DECLARE avg_score FLOAT;
 
     -- Compute the average score for the given user
     SELECT AVG(score) INTO avg_score
