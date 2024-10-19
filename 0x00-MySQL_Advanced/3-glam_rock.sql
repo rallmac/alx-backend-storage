@@ -1,3 +1,7 @@
+-- This function finds data in database
+-- using some criteria
+
+
 SELECT 
     band_name, 
     IFNULL(split, 2022) - formed AS lifespan
