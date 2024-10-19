@@ -1,3 +1,6 @@
+-- This Script creates new stored procedure
+-- and adds a new correction for a student
+
 DELIMITER $$
 
 CREATE PROCEDURE AddBonus(IN user_id INT, IN project_name VARCHAR(255), IN score INT)
@@ -7,8 +10,7 @@ BEGIN
     -- Check if the project exists
     SELECT id INTO project_id
     FROM projects
-    WHERE name = project_name
-    LIMIT 1;
+    WHERE name = project_name;
 
     -- If no project is found, insert the new project
     IF project_id IS NULL THEN
