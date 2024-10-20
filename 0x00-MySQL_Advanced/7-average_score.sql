@@ -13,7 +13,7 @@ BEGIN
 
     -- Update the users table with the computed average score
     UPDATE users
-    SET average_score = avg_score
+    SET average_score = TRUNCATE(avg_score, 0)
     WHERE id = user_id;
 
 END$$
