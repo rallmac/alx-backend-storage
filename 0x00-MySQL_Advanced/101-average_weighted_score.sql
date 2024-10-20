@@ -5,43 +5,26 @@ DELIMITER $$
 
 CREATE PROCEDURE ComputeAverageWeightedScoreForUsers()
 BEGIN
-    DECLARE done INT DEFAULT FALSE;
-    DECLARE user_id INT;
-    DECLARE avg_weighted_score DECIMAL(10,2);
-    DECLARE cur CURSOR FOR 
-        SELECT id FROM users;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    DECLARE done INT DEFAULT 0;
+    DECLARE curr_user_id INT;
 
+    -- Cursor to loop through all users
+    DECLARE cur CURSOR FOR SELECT id FROM users;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Start the cursor and loop through each user
     OPEN cur;
-
+    
     read_loop: LOOP
-        FETCH cur INTO user_id;  -- Fetch user ID into variable
+        FETCH cur INTO curr_user_id;
         IF done THEN
-            LEAVE read_loop;  -- Exit loop if no more users
+            LEAVE read_loop;
         END IF;
-
-        -- Calculate total weighted score and total weight for the current user
-        SELECT 
-            SUM(score * weight) INTO avg_weighted_score,
-            SUM(weight) INTO total_weight
-        FROM scores
-        WHERE user_id = user_id;
-
-        -- Compute the average weighted score if total weight > 0
-        IF total_weight > 0 THEN
-            SET avg_weighted_score = avg_weighted_score / total_weight;
-        ELSE
-            SET avg_weighted_score = 0; -- Avoid division by zero
-        END IF;
-
-        -- Update the users table with the computed average weighted score
-        UPDATE users
-        SET average_weighted_score = avg_weighted_score
-        WHERE id = user_id;
-
+        
+        CALL ComputeAverageWeightedScoreForUser(curr_user_id);
     END LOOP;
-
+    
     CLOSE cur;
-END$$
+END $$
 
 DELIMITER ;

@@ -5,33 +5,31 @@ DELIMITER $$
 
 CREATE PROCEDURE ComputeAverageWeightedScoreForUser(IN user_id INT)
 BEGIN
-    DECLARE total_score DECIMAL(10,2);
-    DECLARE total_weight DECIMAL(10,2);
-    DECLARE avg_weighted_score DECIMAL(10,2);
+    DECLARE total_weight INT DEFAULT 0;
+    DECLARE weighted_sum FLOAT DEFAULT 0;
 
-    -- Initialize variables
-    SET total_score = 0;
-    SET total_weight = 0;
+    -- Calculate total weight for the user's projects
+    SELECT SUM(p.weight) INTO total_weight
+    FROM corrections c
+    JOIN projects p ON c.project_id = p.id
+    WHERE c.user_id = user_id;
 
-    -- Calculate the total score and total weight for the user
-    SELECT SUM(score * weight) INTO total_score,
-           SUM(weight) INTO total_weight
-    FROM scores
-    WHERE user_id = user_id;
+    -- Calculate the weighted sum of the scores
+    SELECT SUM(c.score * p.weight) INTO weighted_sum
+    FROM corrections c
+    JOIN projects p ON c.project_id = p.id
+    WHERE c.user_id = user_id;
 
-    -- Compute the weighted average score
+    -- Update the user's average score in the users table
     IF total_weight > 0 THEN
-        SET avg_weighted_score = total_score / total_weight;
+        UPDATE users
+        SET average_score = weighted_sum / total_weight
+        WHERE id = user_id;
     ELSE
-        SET avg_weighted_score = 0; -- Avoid division by zero
+        UPDATE users
+        SET average_score = 0
+        WHERE id = user_id;
     END IF;
-
-    -- Update the users table with the computed average weighted score
-    UPDATE users
-    SET average_weighted_score = avg_weighted_score
-    WHERE id = user_id;
-
-END$$
+END $$
 
 DELIMITER ;
-
