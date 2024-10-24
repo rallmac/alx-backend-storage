@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ This module creates a cache class with call count
-    functionalit
+    and call history functionality.
 """
 
 import redis
@@ -9,15 +9,50 @@ from typing import Any, Union, Callable, Optional
 from functools import wraps
 
 
-class Cache:
-    """Cache class for storing data in Redis.
-    """
-    def __init__(self) -> None:
-        """Initialize the Cache class.
+def count_calls(method: Callable) -> Callable:
+    """Decorator to count how many times a method is called."""
+    @wraps(method)
+    def wrapper(self: Any, *args, **kwargs) -> str:
+        """Wrapper function to increment the call count
+           in Redis.
         """
+        self._redis.incr(method.__qualname__)
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+def call_history(method: Callable) -> Callable:
+    """Decorator to store the history of inputs and
+       outputs of a function.
+    """
+    @wraps(method)
+    def wrapper(self: Any, *args, **kwargs) -> Any:
+        """Wrapper function to store inputs and outputs
+           in Redis lists.
+        """
+        input_key = f"{method.__qualname__}:inputs"
+        output_key = f"{method.__qualname__}:outputs"
+
+        self._redis.rpush(input_key, str(args))
+
+        result = method(self, *args, **kwargs)
+
+        self._redis.rpush(output_key, str(result))
+
+        return result
+
+    return wrapper
+
+
+class Cache:
+    """Cache class for storing data in Redis."""
+    def __init__(self) -> None:
+        """Initialize the Cache class."""
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @call_history
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Store the data in Redis with a random key and
            return the key.
@@ -50,15 +85,3 @@ class Cache:
     def get_int(self, data: bytes) -> int:
         """Retrieve data as an integer."""
         return int(data)
-
-
-def count_calls(method: Callable) -> Callable:
-    """Decorator to count how many times a method is called."""
-    @wraps(method)
-    def wrapper(self: Any, *args, **kwargs) -> str:
-        """Wrapper function to increment the call count
-           in Redis.
-        """
-        self._redis.incr(method.__qualname__)
-        return method(self, *args, **kwargs)
-    return wrapper
