@@ -1,0 +1,4 @@
+// This script finds a document in the collection called school
+
+
+db.school.find({name: "Holberton school"});

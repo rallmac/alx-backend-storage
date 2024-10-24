@@ -1,0 +1,3 @@
+// This script uses the database my_db or create one
+
+use my_db
