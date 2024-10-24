@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-""" This module creates a cache class with call count
-    and call history functionality.
+""" This module creates a cache class with call count,
+    call history, and replay functionality.
 """
 
 import redis
@@ -27,8 +27,8 @@ def call_history(method: Callable) -> Callable:
     """
     @wraps(method)
     def wrapper(self: Any, *args, **kwargs) -> Any:
-        """Wrapper function to store inputs and outputs
-           in Redis lists.
+        """Wrapper function to store inputs and outputs in
+           Redis lists.
         """
         input_key = f"{method.__qualname__}:inputs"
         output_key = f"{method.__qualname__}:outputs"
@@ -42,6 +42,25 @@ def call_history(method: Callable) -> Callable:
         return result
 
     return wrapper
+
+
+def replay(method: Callable) -> None:
+    """Display the history of calls of a particular
+       function.
+    """
+    redis_client = method.__self__._redis
+    method_name = method.__qualname__
+
+    inputs = redis_client.lrange(f"{method_name}:inputs", 0, -1)
+    outputs = redis_client.lrange(f"{method_name}:outputs", 0, -1)
+
+    call_count = len(inputs)
+    print(f"{method_name} was called {call_count} times:")
+
+    for input_data, output_data in zip(inputs, outputs):
+        input_str = input_data.decode('utf-8')
+        output_str = output_data.decode('utf-8')
+        print(f"{method_name}(*{input_str}) -> {output_str}")
 
 
 class Cache:
